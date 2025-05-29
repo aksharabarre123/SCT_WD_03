@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .container {
+            max-width: 800px; /* Increased max-width for larger screens */
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: #f9fafb; /* bg-gray-50 */
+            border-radius: 0.75rem; /* rounded-lg */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08); /* shadow-md */
+        }
+        .question-card {
+            margin-bottom: 1.5rem; /* mb-6 */
+            padding: 1.5rem;   /* p-6 */
+            background-color: #fff; /* bg-white */
+            border-radius: 0.5rem;  /* rounded-md */
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);  /* shadow-sm */
+        }
+        .question-text {
+            font-size: 1.25rem; /* text-xl */
+            font-weight: 500;    /* font-semibold */
+            margin-bottom: 1rem; /* mb-4 */
+            color: #1f2937;  /* text-gray-800 */
+        }
+        .options-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .option-item {
+            margin-bottom: 0.75rem; /* mb-3 */
+        }
+        .option-label {
+            display: inline-flex; /* Use inline-flex for better alignment */
+            align-items: center;
+            cursor: pointer;
+            width: 100%; /* Make label take full width */
+        }
+
+        .option-input {
+            margin-right: 0.5rem; /* mr-2 */
+        }
+
+        .option-text {
+            font-size: 1rem;    /* text-base */
+            color: #374151;  /* text-gray-700 */
+        }
+
+        .selected-option {
+            background-color: #f0fdf4; /* bg-green-100 */
+            border-color: #34d399;   /* border-green-300 */
+            color: #065f46;      /* text-green-800 */
+        }
+
+        .selected-option .option-text{
+             color: #065f46;
+        }
+
+        .submit-button {
+            padding: 0.75rem 1.5rem;  /* py-3 px-6 */
+            background-color: #4f46e5; /* bg-indigo-600 */
+            color: #fff;         /* text-white */
+            font-size: 1rem;    /* text-base */
+            border-radius: 0.375rem;  /* rounded-md */
+            cursor: pointer;
+            transition: background-color 0.3s ease; /* Smooth transition */
+            margin-top: 1rem; /* mt-4 */
+            width: 100%; /* Make button take full width */
+            display: block; /* Ensure block display for width to apply */
+            text-align: center; /* Center the text */
+        }
+        .submit-button:hover {
+            background-color: #4338ca; /* hover:bg-indigo-700 */
+        }
+        .result-card {
+            padding: 1.5rem; /* p-6 */
+            background-color: #fff; /* bg-white */
+            border-radius: 0.5rem;  /* rounded-md */
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);  /* shadow-sm */
+            margin-top: 1.5rem; /* mt-6 */
+            text-align: center;
+        }
+        .result-title {
+            font-size: 1.5rem; /* text-2xl */
+            font-weight: 600;    /* font-semibold */
+            margin-bottom: 1rem; /* mb-4 */
+            color: #1f2937;  /* text-gray-800 */
+        }
+        .result-score {
+            font-size: 1.25rem; /* text-xl */
+            color: #34d399;  /* text-green-500 */
+            margin-bottom: 1.5rem; /* mb-6 */
+        }
+        .restart-button {
+            padding: 0.75rem 1.5rem;  /* py-3 px-6 */
+            background-color: #4f46e5; /* bg-indigo-600 */
+            color: #fff;         /* text-white */
+            font-size: 1rem;    /* text-base */
+            border-radius: 0.375rem;  /* rounded-md */
+            cursor: pointer;
+            transition: background-color 0.3s ease; /* Smooth transition */
+            margin-top: 1rem; /* mt-4 */
+            width: 100%; /* Make button take full width */
+            display: block; /* Ensure block display for width to apply */
+            text-align: center; /* Center the text */
+        }
+        .restart-button:hover {
+            background-color: #4338ca; /* hover:bg-indigo-700 */
+        }
+
+        .feedback {
+            margin-top: 1rem; /* mt-4 */
+            padding: 1rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+        }
+
+        .correct-answer {
+            background-color: #f0fdf4;
+            border-left: 4px solid #34d399;
+            color: #065f46;
+        }
+
+        .wrong-answer {
+            background-color: #fee2e2;
+            border-left: 4px solid #ef4444;
+            color: #b91c1c;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container">
+        <h1 class="text-2xl font-semibold mb-6 text-gray-800 text-center">Quiz Game</h1>
+        <div id="quiz-content">
+            </div>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                question: "What is the capital of France?",
+                options: [
+                    { id: 'a', text: "London" },
+                    { id: 'b', text: "Paris" },
+                    { id: 'c', text: "Berlin" },
+                    { id: 'd', text: "Rome" }
+                ],
+                correctAnswer: 'b'
+            },
+            {
+                question: "What is the highest mountain in the world?",
+                options: [
+                    { id: 'a', text: "K2" },
+                    { id: 'b', text: "Kangchenjunga" },
+                    { id: 'c', text: "Mount Everest" },
+                    { id: 'd', text: "Lhotse" }
+                ],
+                correctAnswer: 'c'
+            },
+            {
+                question: "What is the chemical symbol for gold?",
+                options: [
+                    { id: 'a', text: "Au" },
+                    { id: 'b', text: "Ag" },
+                    { id: 'c', text: "Fe" },
+                    { id: 'd', text: "Cu" }
+                ],
+                correctAnswer: 'a'
+            },
+             {
+                question: "Which planet is known as the 'Red Planet'?",
+                options: [
+                    { id: 'a', text: "Venus" },
+                    { id: 'b', text: "Mars" },
+                    { id: 'c', text: "Jupiter" },
+                    { id: 'd', text: "Saturn" }
+                ],
+                correctAnswer: 'b'
+            },
+            {
+                question: "What is the largest ocean on Earth?",
+                options: [
+                    { id: 'a', text: "Atlantic Ocean" },
+                    { id: 'b', text: "Indian Ocean" },
+                    { id: 'c', text: "Arctic Ocean" },
+                    { id: 'd', text: "Pacific Ocean" }
+                ],
+                correctAnswer: 'd'
+            },
+        ];
+
+        const quizContent = document.getElementById('quiz-content');
+        let selectedAnswers = {};
+        let score = 0;
+        let currentQuestionIndex = 0;
+
+        function renderQuestion() {
+            const currentQuestion = quizData[currentQuestionIndex];
+
+            const questionCard = document.createElement('div');
+            questionCard.className = 'question-card';
+
+            const questionText = document.createElement('h2');
+            questionText.className = 'question-text';
+            questionText.textContent = currentQuestion.question;
+
+            const optionsList = document.createElement('ul');
+            optionsList.className = 'options-list';
+
+            currentQuestion.options.forEach(option => {
+                const optionItem = document.createElement('li');
+                optionItem.className = 'option-item';
+
+                const optionLabel = document.createElement('label');
+                optionLabel.className = 'option-label';
+
+                const optionInput = document.createElement('input');
+                optionInput.type = 'radio';
+                optionInput.name = `question-${currentQuestionIndex}`;
+                optionInput.value = option.id;
+                optionInput.className = 'option-input';
+                optionInput.checked = selectedAnswers[currentQuestionIndex] === option.id;
+
+                const optionText = document.createElement('span');
+                optionText.className = 'option-text';
+                optionText.textContent = option.text;
+
+                optionLabel.appendChild(optionInput);
+                optionLabel.appendChild(optionText);
+                optionLabel.addEventListener('click', () => {
+                    selectedAnswers[currentQuestionIndex] = option.id;
+                    renderQuestion(); // Re-render to update selected option styling
+                });
+                optionItem.appendChild(optionLabel);
+                optionsList.appendChild(optionItem);
+            });
+
+            questionCard.appendChild(questionText);
+            questionCard.appendChild(optionsList);
+
+            const submitButton = document.createElement('button');
+            submitButton.className = 'submit-button';
+            submitButton.textContent = currentQuestionIndex === quizData.length - 1 ? 'Finish Quiz' : 'Next Question';
+            submitButton.onclick = () => {
+                if (selectedAnswers[currentQuestionIndex] === undefined) {
+                    alert('Please select an answer.');
+                    return;
+                }
+
+                if (currentQuestionIndex === quizData.length - 1) {
+                    calculateScore();
+                    renderResult();
+                } else {
+                    currentQuestionIndex++;
+                    renderQuestion();
+                }
+            };
+
+            questionCard.appendChild(submitButton);
+            quizContent.innerHTML = '';
+            quizContent.appendChild(questionCard);
+        }
+
+        function calculateScore() {
+            score = 0;
+            quizData.forEach((question, index) => {
+                if (selectedAnswers[index] === question.correctAnswer) {
+                    score++;
+                }
+            });
+        }
+
+        function renderResult() {
+            const resultCard = document.createElement('div');
+            resultCard.className = 'result-card';
+
+            const resultTitle = document.createElement('h2');
+            resultTitle.className = 'result-title';
+            resultTitle.textContent = 'Quiz Result';
+
+            const resultScore = document.createElement('p');
+            resultScore.className = 'result-score';
+            resultScore.textContent = `Your Score: ${score} / ${quizData.length}`;
+
+            //add feedback for correct and wrong answers
+            quizData.forEach((question, index) => {
+                const selectedOption = selectedAnswers[index];
+                const correctAnswer = question.correctAnswer;
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'feedback';
+                questionDiv.textContent = `Question ${index + 1}: ${question.question}`;
+
+                if (selectedOption === correctAnswer) {
+                    questionDiv.classList.add('correct-answer');
+                    questionDiv.textContent += "  Correct Answer";
+                } else {
+                    questionDiv.classList.add('wrong-answer');
+                    questionDiv.textContent += `  Wrong Answer, Correct Answer is ${question.options.find(opt => opt.id === correctAnswer).text}`;
+                }
+                resultCard.appendChild(questionDiv);
+            });
+
+            const restartButton = document.createElement('button');
+            restartButton.className = 'restart-button';
+            restartButton.textContent = 'Restart Quiz';
+            restartButton.onclick = () => {
+                selectedAnswers = {};
+                score = 0;
+                currentQuestionIndex = 0;
+                renderQuestion();
+            };
+
+            resultCard.appendChild(resultTitle);
+            resultCard.appendChild(resultScore);
+            resultCard.appendChild(restartButton);
+            quizContent.innerHTML = '';
+            quizContent.appendChild(resultCard);
+        }
+
+        renderQuestion();
+    </script>
+</body>
+</html>
